@@ -14,13 +14,15 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
+#include "./ft_printf/ft_printf.h"
 //240 159 152 129
-
+int	ft_printf(const char *str, ...);
 void sighand(int signum, siginfo_t *info, void *v)
 {
 	static char	c;
 	static int		bit;
 
+	(void) v;
 	if (bit < 8)
 	{
 		if(signum == SIGUSR2)
@@ -31,38 +33,28 @@ void sighand(int signum, siginfo_t *info, void *v)
 	}
 	if (bit == 8)
 	{
+		if (c == 0)
+		{
+			kill(info->si_pid, 10);
+		}
 		write(1, &c, 1);
-		//kill(SIGUSR1, info->si_pid);
 		c = 0;
 		bit = 0;
 	}
-
 	return ;
 }
 
-void print_pid(int nbr)
-{
-	if (nbr > 9)
-	{
-		print_pid(nbr / 10);
-		nbr %= 10;
-	}
-	nbr += 48;
-	write(1, &nbr, 1);
-	return ;
-}
 
 int main()
 {
 	int pid;
-	siginfo_t	*info;
 	struct sigaction	sa;
 
 	pid = getpid();
+	ft_printf("%d\n", pid);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = sighand;
 	
-	print_pid(pid);
 	while(1)
 	{
 		sigaction(SIGUSR1, &sa, NULL);
